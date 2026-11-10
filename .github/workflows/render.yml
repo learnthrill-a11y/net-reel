@@ -1,0 +1,24 @@
+name: Render reel
+on:
+  workflow_dispatch:
+  push:
+    paths: ['reel-render.html', 'voice.mp3', 'voice.m4a', 'voice.wav']
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: npm install
+      - name: Render
+        run: |
+          for f in voice.mp3 voice.m4a voice.wav; do
+            if [ -f "$f" ]; then node render.mjs "$f"; exit 0; fi
+          done
+          node render.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reel
+          path: reel.mp4
